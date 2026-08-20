@@ -83,6 +83,12 @@ OFFLINE_ENVIRONMENT = {
 DETERMINISM_ENVIRONMENT = {
     "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
 }
+PROMPT_ADAPTER_STRATEGY = "qwen_chat_template_single_user_v1"
+PROMPT_ADAPTER_OPTIONS = {
+    "add_generation_prompt": True,
+    "message_role": "user",
+    "tokenize": True,
+}
 V0_STRATEGY = "group_mean"
 DETERMINISM_POLICY = {
     "cublas_workspace_config": DETERMINISM_ENVIRONMENT["CUBLAS_WORKSPACE_CONFIG"],
@@ -156,6 +162,7 @@ class RunnerConfig:
                 "schema_sha256": schema_hash(),
                 "v0_strategy": V0_STRATEGY,
                 "determinism_policy": DETERMINISM_POLICY,
+                "prompt_adapter_strategy": PROMPT_ADAPTER_STRATEGY,
             }
         )
         return value
@@ -268,6 +275,40 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _prompt_adapter_metadata(chat_template_sha256: Optional[str]) -> Dict[str, Any]:
+    return {
+        "chat_template_sha256": chat_template_sha256,
+        "strategy": PROMPT_ADAPTER_STRATEGY,
+        **PROMPT_ADAPTER_OPTIONS,
+    }
+
+
+def _paired_config_value(
+    config: RunnerConfig,
+    chat_template_sha256: Optional[str],
+) -> Dict[str, Any]:
+    value = asdict(config)
+    value["arm"] = "both"
+    value["prompt_adapter"] = _prompt_adapter_metadata(chat_template_sha256)
+    return value
+
+
+def _chat_template_sha256(model_root: Path) -> str:
+    tokenizer_config_path = model_root / "tokenizer_config.json"
+    try:
+        tokenizer_config = json.loads(tokenizer_config_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            "prompt adapter requires readable tokenizer_config.json with chat_template"
+        ) from exc
+    template = tokenizer_config.get("chat_template")
+    if not isinstance(template, str) or not template:
+        raise RuntimeError(
+            "prompt adapter requires a non-empty string chat_template in tokenizer_config.json"
+        )
+    return hashlib.sha256(template.encode("utf-8")).hexdigest()
+
+
 def _aggregate_files_sha256(root: Path, patterns: Sequence[str]) -> str:
     files = sorted(
         path
@@ -301,12 +342,12 @@ def _bootstrap_provenance(config: RunnerConfig) -> Dict[str, Any]:
     repo_root = Path(__file__).resolve().parents[2]
     model_root = Path(config.model_path).resolve()
     split_digest = split_hashes(seed=config.seed)
-    paired_config = asdict(config)
-    paired_config["arm"] = "both"
+    paired_config = _paired_config_value(config, chat_template_sha256=None)
     provenance: Dict[str, Any] = {
         "git_commit": None,
         "source_hashes": None,
         "source_aggregate_sha256": None,
+        "prompt_adapter": _prompt_adapter_metadata(chat_template_sha256=None),
         "model_path": str(model_root),
         "model_revision": config.base_revision,
         "model_aggregate_sha256": None,
@@ -373,6 +414,9 @@ def _provenance(config: RunnerConfig) -> Dict[str, Any]:
         )
     provenance.update(
         {
+            "prompt_adapter": _prompt_adapter_metadata(
+                _chat_template_sha256(model_root)
+            ),
             "model_aggregate_sha256": _aggregate_files_sha256(
                 model_root, ("*.safetensors", "*.bin", "*.pt")
             ),
@@ -393,6 +437,14 @@ def _provenance(config: RunnerConfig) -> Dict[str, Any]:
             ),
         }
     )
+    paired_config = _paired_config_value(
+        config,
+        chat_template_sha256=provenance["prompt_adapter"]["chat_template_sha256"],
+    )
+    provenance["paired_config_sha256"] = _canonical_hash(paired_config)
+    provenance["paired_arm_invariants"]["shared_config_sha256"] = provenance[
+        "paired_config_sha256"
+    ]
     return provenance
 
 
@@ -661,7 +713,27 @@ def _load_runtime(config: RunnerConfig, seed: int) -> ArmRuntime:
 
 
 def _tokenize(tokenizer: Any, text: str) -> List[int]:
-    return tokenizer(text, add_special_tokens=True, return_attention_mask=False)["input_ids"]
+    """Apply the local Qwen chat template to exactly one user message."""
+    template = getattr(tokenizer, "chat_template", None)
+    if not isinstance(template, str) or not template:
+        raise RuntimeError("prompt adapter requires tokenizer.chat_template")
+    apply_chat_template = getattr(tokenizer, "apply_chat_template", None)
+    if not callable(apply_chat_template):
+        raise RuntimeError("prompt adapter requires tokenizer.apply_chat_template")
+    try:
+        token_ids = apply_chat_template(
+            [{"role": "user", "content": text}],
+            tokenize=True,
+            add_generation_prompt=True,
+        )
+    except Exception as exc:
+        raise RuntimeError("prompt adapter failed to apply tokenizer.chat_template") from exc
+    if (
+        not isinstance(token_ids, (list, tuple))
+        or any(not isinstance(token_id, int) for token_id in token_ids)
+    ):
+        raise RuntimeError("prompt adapter must return a sequence of token IDs")
+    return list(token_ids)
 
 
 def _generate_action(

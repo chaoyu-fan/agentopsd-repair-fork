@@ -22,7 +22,10 @@ class TestForkPilotTrain(unittest.TestCase):
     def _write_local_model_metadata(self, root: Path) -> None:
         (root / "model.safetensors").write_bytes(b"local model weights")
         (root / "tokenizer.json").write_text('{"model":"test"}\n', encoding="utf-8")
-        (root / "tokenizer_config.json").write_text('{"pad_token":"<pad>"}\n', encoding="utf-8")
+        (root / "tokenizer_config.json").write_text(
+            '{"pad_token":"<pad>","chat_template":"{{ messages[0].content }}"}\n',
+            encoding="utf-8",
+        )
         (root / "config.json").write_text('{"model_type":"qwen2"}\n', encoding="utf-8")
         (root / "generation_config.json").write_text('{"max_new_tokens":8}\n', encoding="utf-8")
 
@@ -84,6 +87,14 @@ class TestForkPilotTrain(unittest.TestCase):
                 sorted(provenance["source_hashes"]),
                 ["fsm_sha256", "opsd_utils_sha256", "runner_sha256"],
             )
+            self.assertEqual(
+                provenance["prompt_adapter"]["strategy"],
+                "qwen_chat_template_single_user_v1",
+            )
+            self.assertRegex(
+                provenance["prompt_adapter"]["chat_template_sha256"],
+                r"^[0-9a-f]{64}$",
+            )
 
     def test_manifest_and_record_have_shared_paired_hashes(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -122,6 +133,14 @@ class TestForkPilotTrain(unittest.TestCase):
             self.assertEqual(
                 manifest["determinism_policy"]["torch_use_deterministic_algorithms"],
                 True,
+            )
+            self.assertEqual(
+                manifest["prompt_adapter"]["strategy"],
+                "qwen_chat_template_single_user_v1",
+            )
+            self.assertEqual(
+                record["prompt_adapter"]["chat_template_sha256"],
+                manifest["prompt_adapter"]["chat_template_sha256"],
             )
 
     def test_run_rejects_single_arm_comparison_output(self):
@@ -364,6 +383,77 @@ class TestForkPilotTrain(unittest.TestCase):
             os.environ["CUBLAS_WORKSPACE_CONFIG"],
             policy["cublas_workspace_config"],
         )
+
+    def test_chat_adapter_uses_exact_single_user_template_arguments(self):
+        class FakeTokenizer:
+            chat_template = "fake-template"
+
+            def __init__(self):
+                self.calls = []
+
+            def apply_chat_template(self, messages, **kwargs):
+                self.calls.append((messages, kwargs))
+                return [101, 102, 103]
+
+            def __call__(self, *args, **kwargs):
+                raise AssertionError("raw tokenizer fallback was used")
+
+        tokenizer = FakeTokenizer()
+        self.assertEqual(runner._tokenize(tokenizer, "Task prompt"), [101, 102, 103])
+        self.assertEqual(
+            tokenizer.calls,
+            [
+                (
+                    [{"role": "user", "content": "Task prompt"}],
+                    {"tokenize": True, "add_generation_prompt": True},
+                )
+            ],
+        )
+
+    def test_student_and_teacher_prompts_share_adapter_but_oracle_is_teacher_only(self):
+        class FakeTokenizer:
+            chat_template = "fake-template"
+
+            def __init__(self):
+                self.calls = []
+
+            def apply_chat_template(self, messages, **kwargs):
+                self.calls.append((messages, kwargs))
+                return [len(self.calls)]
+
+        task = fsm.FSMCodeTask(
+            task_id="fsm-code-v1/golden/chat",
+            split="golden",
+            action_order=("A", "B", "C"),
+        )
+        student_content = fsm.student_view(task, "S0", 0)
+        teacher_content = runner._teacher_prompt(task, "S0", 0)
+        self.assertNotIn("Privileged skill view:", student_content)
+        self.assertIn("Privileged skill view:", teacher_content)
+        tokenizer = FakeTokenizer()
+        self.assertEqual(runner._tokenize(tokenizer, student_content), [1])
+        self.assertEqual(runner._tokenize(tokenizer, teacher_content), [2])
+        self.assertEqual(
+            [call[0][0]["content"] for call in tokenizer.calls],
+            [student_content, teacher_content],
+        )
+        self.assertTrue(
+            all(
+                call[0][0]["role"] == "user"
+                and call[1] == {"tokenize": True, "add_generation_prompt": True}
+                for call in tokenizer.calls
+            )
+        )
+
+    def test_chat_adapter_fails_closed_without_template(self):
+        class MissingTemplateTokenizer:
+            chat_template = None
+
+            def apply_chat_template(self, *args, **kwargs):
+                raise AssertionError("template call should not happen")
+
+        with self.assertRaisesRegex(RuntimeError, "requires tokenizer.chat_template"):
+            runner._tokenize(MissingTemplateTokenizer(), "Task prompt")
 
 
 if __name__ == "__main__":
