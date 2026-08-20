@@ -1,0 +1,56 @@
+{
+  "arms": [
+    "grpo",
+    "agentopsd"
+  ],
+  "chat_template_sha256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
+  "cohort_status": "planned",
+  "comparison_complete": false,
+  "config_metadata_sha256": "6d42315143893751f0a672a0359176c5b4c0d675c74135843b8a5fc728715a45",
+  "device": "cuda:0",
+  "dtype": "bf16",
+  "fork_branch": "repair/fork-pilot",
+  "fork_repo": "/work/FCY/agentopsd-upstream-fork",
+  "fsm_sha256": "d222e7977de4b68a27ddc7284b447220ea2f19eea5ce1b4e5d9c54c88e5bfe14",
+  "git_commit": "46cf04924d7478a609bf59998ca093e257c7b060",
+  "group_size": 4,
+  "label": "fork_engineering_pilot",
+  "lora": {
+    "alpha": 16,
+    "dropout": 0.0,
+    "rank": 8
+  },
+  "max_new_tokens": 8,
+  "max_turns": 3,
+  "model_aggregate_sha256": "6fa0f76c447dd3242e41f0b86b4c76d07c404a04fa35cb6c97e57937057931ce",
+  "model_path": "/work/FCY/.agentopsd-pilot-cache/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "non_claims": [
+    "paper_reproduction",
+    "statistical_significance",
+    "120_update_learning_curve"
+  ],
+  "offline": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "local_files_only": true
+  },
+  "opsd_utils_sha256": "0d43b16765ac5c00e0a9f7ec3d55e9e47fdfe224d5329025833ac28b285bdf3c",
+  "output_roots": {
+    "17": "outputs/fork_engineering_pilot-cohort-20260820-seeds17-29-43-u1/seed17",
+    "29": "outputs/fork_engineering_pilot-cohort-20260820-seeds17-29-43-u1/seed29",
+    "43": "outputs/fork_engineering_pilot-cohort-20260820-seeds17-29-43-u1/seed43"
+  },
+  "pilot_scope": "exploratory_paired_cohort",
+  "prompt_adapter_strategy": "qwen_chat_template_single_user_v1",
+  "runner_sha256": "bbb49acebc25d3e0503a240ca39dc257208ba55d9396fc55483be514f03cd423",
+  "schema_sha256": "f7169e3c352869c18b20d3d14e670c453126d29b784f4ed5f2b99cae91539fe5",
+  "seed_order": [
+    17,
+    29,
+    43
+  ],
+  "task_name": "fsm-code-v1",
+  "tokenizer_metadata_sha256": "1830c95a204e80230362758817a0ced31d635d43825d1208d598a1ec79a096bd",
+  "updates_per_arm_per_seed": 1
+}

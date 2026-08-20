@@ -1,0 +1,58 @@
+{
+  "arms": {
+    "agentopsd": {
+      "arm": "agentopsd",
+      "duration_seconds": 9.284003,
+      "exception_message": null,
+      "exception_type": null,
+      "failure_category": null,
+      "peak_vram_mib": 3092.032,
+      "phase": "complete",
+      "status": "completed",
+      "update": null
+    },
+    "grpo": {
+      "arm": "grpo",
+      "duration_seconds": 13.718917,
+      "exception_message": null,
+      "exception_type": null,
+      "failure_category": null,
+      "peak_vram_mib": 3092.032,
+      "phase": "complete",
+      "status": "completed",
+      "update": null
+    }
+  },
+  "comparison_complete": true,
+  "duration_seconds": 27.471254,
+  "failure_category": null,
+  "label": "fork_engineering_pilot",
+  "pairing": {
+    "candidate": {
+      "0": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d",
+      "1": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d",
+      "2": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d",
+      "3": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d"
+    },
+    "checked": true,
+    "reference": {
+      "0": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d",
+      "1": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d",
+      "2": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d",
+      "3": "68538d3db358e5ba00cf4e789aa98e46ebc69a1b40660e90681710477703955d"
+    },
+    "status": "matched"
+  },
+  "run_status": "completed",
+  "terminal_status": {
+    "arm": "run",
+    "duration_seconds": 27.47076,
+    "exception_message": null,
+    "exception_type": null,
+    "failure_category": null,
+    "peak_vram_mib": null,
+    "phase": "complete",
+    "status": "completed",
+    "update": null
+  }
+}

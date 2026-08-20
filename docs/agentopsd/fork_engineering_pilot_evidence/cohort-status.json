@@ -1,0 +1,190 @@
+{
+  "cohort_manifest_sha256": "2e0c1b85ba705753ee924d249df5555179f4ffb465db85b346df750576bca63e",
+  "cohort_status": "completed",
+  "comparison_complete": true,
+  "descriptive_aggregate": {
+    "agentopsd": {
+      "arm_duration_seconds_sum": 26.932198,
+      "eval_successes": 7.0,
+      "eval_trials": 48,
+      "failure_categories": [
+        null
+      ],
+      "invalid_actions_total": 0,
+      "peak_vram_mib_max": 3409.531
+    },
+    "grpo": {
+      "arm_duration_seconds_sum": 35.077478,
+      "eval_successes": 5.0,
+      "eval_trials": 48,
+      "failure_categories": [
+        null
+      ],
+      "invalid_actions_total": 0,
+      "peak_vram_mib_max": 3409.531
+    }
+  },
+  "design": {
+    "arms": [
+      "grpo",
+      "agentopsd"
+    ],
+    "eval_trials_per_arm_per_seed": 16,
+    "git_commit": "46cf04924d7478a609bf59998ca093e257c7b060",
+    "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "prompt_adapter_strategy": "qwen_chat_template_single_user_v1",
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "updates_per_arm_per_seed": 1
+  },
+  "interpretation": "descriptive_only: three paired one-update runs; no confidence interval, hypothesis test, paper-reproduction, or superiority claim is authorized.",
+  "label": "fork_engineering_pilot",
+  "non_claims": [
+    "paper_reproduction",
+    "statistical_significance",
+    "120_update_learning_curve"
+  ],
+  "paired_eval_success_deltas_agentopsd_minus_grpo": [
+    1.0,
+    0.0,
+    1.0
+  ],
+  "per_seed": [
+    {
+      "arms": {
+        "agentopsd": {
+          "arm_duration_seconds": 9.284003,
+          "eval_successes": 1.0,
+          "eval_trials": 16,
+          "event_count": 5,
+          "failure_category": null,
+          "invalid_actions_total": 0,
+          "peak_vram_mib": 3409.531,
+          "train_reward_array": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "train_reward_sum": 0.0,
+          "train_total_seconds": 3.1443959799998993
+        },
+        "grpo": {
+          "arm_duration_seconds": 13.718917,
+          "eval_successes": 0.0,
+          "eval_trials": 16,
+          "event_count": 5,
+          "failure_category": null,
+          "invalid_actions_total": 0,
+          "peak_vram_mib": 3409.531,
+          "train_reward_array": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "train_reward_sum": 0.0,
+          "train_total_seconds": 3.1072108129992557
+        }
+      },
+      "comparison_complete": true,
+      "eval_success_delta_agentopsd_minus_grpo": 1.0,
+      "pairing_status": "matched",
+      "preupdate_fingerprints_match": true,
+      "run_status": "completed",
+      "seed": 17
+    },
+    {
+      "arms": {
+        "agentopsd": {
+          "arm_duration_seconds": 8.565181,
+          "eval_successes": 0.0,
+          "eval_trials": 16,
+          "event_count": 5,
+          "failure_category": null,
+          "invalid_actions_total": 0,
+          "peak_vram_mib": 3409.531,
+          "train_reward_array": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "train_reward_sum": 0.0,
+          "train_total_seconds": 2.3573531249985535
+        },
+        "grpo": {
+          "arm_duration_seconds": 10.458642,
+          "eval_successes": 0.0,
+          "eval_trials": 16,
+          "event_count": 5,
+          "failure_category": null,
+          "invalid_actions_total": 0,
+          "peak_vram_mib": 3409.531,
+          "train_reward_array": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "train_reward_sum": 0.0,
+          "train_total_seconds": 2.6070299269995303
+        }
+      },
+      "comparison_complete": true,
+      "eval_success_delta_agentopsd_minus_grpo": 0.0,
+      "pairing_status": "matched",
+      "preupdate_fingerprints_match": true,
+      "run_status": "completed",
+      "seed": 29
+    },
+    {
+      "arms": {
+        "agentopsd": {
+          "arm_duration_seconds": 9.083014,
+          "eval_successes": 6.0,
+          "eval_trials": 16,
+          "event_count": 5,
+          "failure_category": null,
+          "invalid_actions_total": 0,
+          "peak_vram_mib": 3409.531,
+          "train_reward_array": [
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "train_reward_sum": 2.0,
+          "train_total_seconds": 2.5532415469988337
+        },
+        "grpo": {
+          "arm_duration_seconds": 10.899919,
+          "eval_successes": 5.0,
+          "eval_trials": 16,
+          "event_count": 5,
+          "failure_category": null,
+          "invalid_actions_total": 0,
+          "peak_vram_mib": 3409.531,
+          "train_reward_array": [
+            1.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "train_reward_sum": 2.0,
+          "train_total_seconds": 2.7189652449997084
+        }
+      },
+      "comparison_complete": true,
+      "eval_success_delta_agentopsd_minus_grpo": 1.0,
+      "pairing_status": "matched",
+      "preupdate_fingerprints_match": true,
+      "run_status": "completed",
+      "seed": 43
+    }
+  ],
+  "pilot_scope": "exploratory_paired_cohort"
+}

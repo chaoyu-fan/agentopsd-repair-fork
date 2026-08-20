@@ -1,0 +1,84 @@
+{
+  "arm": "both",
+  "base_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "comparison_complete": true,
+  "config_metadata_sha256": "6d42315143893751f0a672a0359176c5b4c0d675c74135843b8a5fc728715a45",
+  "determinism_policy": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_matmul_allow_tf32": false,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": true,
+    "torch_use_deterministic_algorithms": true
+  },
+  "device": "cuda",
+  "dtype": "bf16",
+  "eval_size": 4,
+  "failure_category": null,
+  "git_commit": "46cf04924d7478a609bf59998ca093e257c7b060",
+  "group_size": 4,
+  "label": "fork_engineering_pilot",
+  "learning_rate": 1e-05,
+  "lora_alpha": 16,
+  "lora_dropout": 0.0,
+  "lora_rank": 8,
+  "max_grad_norm": 1.0,
+  "max_new_tokens": 8,
+  "max_turns": 3,
+  "model_aggregate_sha256": "6fa0f76c447dd3242e41f0b86b4c76d07c404a04fa35cb6c97e57937057931ce",
+  "model_path": "/work/FCY/.agentopsd-pilot-cache/Qwen2.5-1.5B-Instruct",
+  "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "offline": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "local_files_only": true
+  },
+  "opsd_granularity": "turn",
+  "output_dir": "/work/FCY/agentopsd-upstream-fork/outputs/fork_engineering_pilot-cohort-20260820-seeds17-29-43-u1/seed29",
+  "paired_arm_invariants": {
+    "base_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "model_path": "/work/FCY/.agentopsd-pilot-cache/Qwen2.5-1.5B-Instruct",
+    "seed": 29,
+    "shared_config_sha256": "323870ddc0037043d5fb3ae6012159622bc1cf14bf53508d29d4405e3a65574b"
+  },
+  "paired_config_sha256": "323870ddc0037043d5fb3ae6012159622bc1cf14bf53508d29d4405e3a65574b",
+  "prompt_adapter": {
+    "add_generation_prompt": true,
+    "chat_template_sha256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
+    "message_role": "user",
+    "strategy": "qwen_chat_template_single_user_v1",
+    "tokenize": true
+  },
+  "prompt_adapter_strategy": "qwen_chat_template_single_user_v1",
+  "rollout_plan_sha256": "24aae872ab83ea56e84577f10294834e9fa80d7eff1a3c85f1783dbe59d2ebf2",
+  "run_status": "completed",
+  "schema_sha256": "f7169e3c352869c18b20d3d14e670c453126d29b784f4ed5f2b99cae91539fe5",
+  "seed": 29,
+  "source_aggregate_sha256": "bc533f3b3d65424f000f41f5eafc63c9270ea44af9566cbe2c127b783d44daa6",
+  "source_hashes": {
+    "fsm_sha256": "d222e7977de4b68a27ddc7284b447220ea2f19eea5ce1b4e5d9c54c88e5bfe14",
+    "opsd_utils_sha256": "0d43b16765ac5c00e0a9f7ec3d55e9e47fdfe224d5329025833ac28b285bdf3c",
+    "runner_sha256": "bbb49acebc25d3e0503a240ca39dc257208ba55d9396fc55483be514f03cd423"
+  },
+  "split_hashes": {
+    "eval": "d89b96daa19c142fb6caf1be5135fc5746af00373a15870c2897eab6b1e5d297",
+    "train": "a47985f121921c7d2d7b84f6bb741d0262ca08f7e00b654d524f966673f8b28f"
+  },
+  "task_name": "fsm-code-v1",
+  "temperature": 0.7,
+  "terminal_status": {
+    "arm": "run",
+    "duration_seconds": 20.426423,
+    "exception_message": null,
+    "exception_type": null,
+    "failure_category": null,
+    "peak_vram_mib": null,
+    "phase": "complete",
+    "status": "completed",
+    "update": null
+  },
+  "tokenizer_metadata_sha256": "1830c95a204e80230362758817a0ced31d635d43825d1208d598a1ec79a096bd",
+  "top_p": 0.95,
+  "train_size": 8,
+  "updates": 1,
+  "v0_strategy": "group_mean"
+}

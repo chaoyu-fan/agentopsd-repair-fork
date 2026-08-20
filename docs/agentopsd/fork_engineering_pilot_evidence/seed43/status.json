@@ -1,0 +1,58 @@
+{
+  "arms": {
+    "agentopsd": {
+      "arm": "agentopsd",
+      "duration_seconds": 9.083014,
+      "exception_message": null,
+      "exception_type": null,
+      "failure_category": null,
+      "peak_vram_mib": 3092.032,
+      "phase": "complete",
+      "status": "completed",
+      "update": null
+    },
+    "grpo": {
+      "arm": "grpo",
+      "duration_seconds": 10.899919,
+      "exception_message": null,
+      "exception_type": null,
+      "failure_category": null,
+      "peak_vram_mib": 3092.032,
+      "phase": "complete",
+      "status": "completed",
+      "update": null
+    }
+  },
+  "comparison_complete": true,
+  "duration_seconds": 21.547021,
+  "failure_category": null,
+  "label": "fork_engineering_pilot",
+  "pairing": {
+    "candidate": {
+      "0": "dc123a0f9324cd4b036971803e61732e94822ff8055d36a8d535f480af437d4c",
+      "1": "cdd793bd5632ac52ea88b03514330159e9fae84835103a6cdd24184d0b25dc29",
+      "2": "dc123a0f9324cd4b036971803e61732e94822ff8055d36a8d535f480af437d4c",
+      "3": "cdd793bd5632ac52ea88b03514330159e9fae84835103a6cdd24184d0b25dc29"
+    },
+    "checked": true,
+    "reference": {
+      "0": "dc123a0f9324cd4b036971803e61732e94822ff8055d36a8d535f480af437d4c",
+      "1": "cdd793bd5632ac52ea88b03514330159e9fae84835103a6cdd24184d0b25dc29",
+      "2": "dc123a0f9324cd4b036971803e61732e94822ff8055d36a8d535f480af437d4c",
+      "3": "cdd793bd5632ac52ea88b03514330159e9fae84835103a6cdd24184d0b25dc29"
+    },
+    "status": "matched"
+  },
+  "run_status": "completed",
+  "terminal_status": {
+    "arm": "run",
+    "duration_seconds": 21.546555,
+    "exception_message": null,
+    "exception_type": null,
+    "failure_category": null,
+    "peak_vram_mib": null,
+    "phase": "complete",
+    "status": "completed",
+    "update": null
+  }
+}
