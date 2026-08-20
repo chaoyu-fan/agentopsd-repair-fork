@@ -296,47 +296,22 @@ def _git_commit(repo_root: Path) -> str:
     return "{}-dirty".format(head) if dirty else head
 
 
-def _provenance(config: RunnerConfig) -> Dict[str, Any]:
+def _bootstrap_provenance(config: RunnerConfig) -> Dict[str, Any]:
+    """Build a no-fail manifest envelope before validating local provenance."""
     repo_root = Path(__file__).resolve().parents[2]
     model_root = Path(config.model_path).resolve()
-    if not model_root.is_dir():
-        raise FileNotFoundError(
-            "model path must be an existing local directory; downloads are disabled: {}".format(
-                model_root
-            )
-        )
     split_digest = split_hashes(seed=config.seed)
     paired_config = asdict(config)
     paired_config["arm"] = "both"
-    source_hashes = {
-        "fsm_sha256": _file_sha256(repo_root / "examples/agentopsd_trainer/fork_pilot_fsm.py"),
-        "opsd_utils_sha256": _file_sha256(repo_root / "verl/trainer/ppo/opsd_utils.py"),
-        "runner_sha256": _file_sha256(Path(__file__).resolve()),
-    }
-    return {
-        "git_commit": _git_commit(repo_root),
-        "source_hashes": source_hashes,
-        "source_aggregate_sha256": _canonical_hash(source_hashes),
+    provenance: Dict[str, Any] = {
+        "git_commit": None,
+        "source_hashes": None,
+        "source_aggregate_sha256": None,
         "model_path": str(model_root),
         "model_revision": config.base_revision,
-        "model_aggregate_sha256": _aggregate_files_sha256(
-            model_root, ("*.safetensors", "*.bin", "*.pt")
-        ),
-        "tokenizer_metadata_sha256": _aggregate_files_sha256(
-            model_root,
-            (
-                "tokenizer.json",
-                "tokenizer_config.json",
-                "special_tokens_map.json",
-                "added_tokens.json",
-                "vocab.json",
-                "merges.txt",
-                "spiece.model",
-            ),
-        ),
-        "config_metadata_sha256": _aggregate_files_sha256(
-            model_root, ("config.json", "generation_config.json")
-        ),
+        "model_aggregate_sha256": None,
+        "tokenizer_metadata_sha256": None,
+        "config_metadata_sha256": None,
         "split_hashes": split_digest,
         "schema_sha256": schema_hash(),
         "v0_strategy": V0_STRATEGY,
@@ -350,6 +325,75 @@ def _provenance(config: RunnerConfig) -> Dict[str, Any]:
         },
         "offline": _enforce_offline(),
     }
+    try:
+        source_hashes = {
+            "fsm_sha256": _file_sha256(repo_root / "examples/agentopsd_trainer/fork_pilot_fsm.py"),
+            "opsd_utils_sha256": _file_sha256(repo_root / "verl/trainer/ppo/opsd_utils.py"),
+            "runner_sha256": _file_sha256(Path(__file__).resolve()),
+        }
+        provenance.update(
+            {
+                "git_commit": _git_commit(repo_root),
+                "source_hashes": source_hashes,
+                "source_aggregate_sha256": _canonical_hash(source_hashes),
+            }
+        )
+    except BaseException:
+        pass
+    return provenance
+
+
+def _preflight_provenance(config: RunnerConfig) -> Dict[str, Any]:
+    """Capture non-model provenance so even a missing local model is auditable."""
+    provenance = _bootstrap_provenance(config)
+    repo_root = Path(__file__).resolve().parents[2]
+    source_hashes = {
+        "fsm_sha256": _file_sha256(repo_root / "examples/agentopsd_trainer/fork_pilot_fsm.py"),
+        "opsd_utils_sha256": _file_sha256(repo_root / "verl/trainer/ppo/opsd_utils.py"),
+        "runner_sha256": _file_sha256(Path(__file__).resolve()),
+    }
+    provenance.update(
+        {
+            "git_commit": _git_commit(repo_root),
+            "source_hashes": source_hashes,
+            "source_aggregate_sha256": _canonical_hash(source_hashes),
+        }
+    )
+    return provenance
+
+
+def _provenance(config: RunnerConfig) -> Dict[str, Any]:
+    provenance = _preflight_provenance(config)
+    model_root = Path(config.model_path).resolve()
+    if not model_root.is_dir():
+        raise FileNotFoundError(
+            "model path must be an existing local directory; downloads are disabled: {}".format(
+                model_root
+            )
+        )
+    provenance.update(
+        {
+            "model_aggregate_sha256": _aggregate_files_sha256(
+                model_root, ("*.safetensors", "*.bin", "*.pt")
+            ),
+            "tokenizer_metadata_sha256": _aggregate_files_sha256(
+                model_root,
+                (
+                    "tokenizer.json",
+                    "tokenizer_config.json",
+                    "special_tokens_map.json",
+                    "added_tokens.json",
+                    "vocab.json",
+                    "merges.txt",
+                    "spiece.model",
+                ),
+            ),
+            "config_metadata_sha256": _aggregate_files_sha256(
+                model_root, ("config.json", "generation_config.json")
+            ),
+        }
+    )
+    return provenance
 
 
 def _rollout_spec(
@@ -450,10 +494,33 @@ def _append_jsonl(path: Path, value: Dict[str, Any]) -> None:
         handle.flush()
 
 
+def _prepare_output_dir(output_dir: Path) -> None:
+    """Reserve one absent or empty directory for exactly one pilot attempt."""
+    pilot_artifacts = (
+        "manifest.json",
+        "status.json",
+        "terminal.jsonl",
+        "grpo",
+        "agentopsd",
+    )
+    if output_dir.exists():
+        if not output_dir.is_dir():
+            raise NotADirectoryError("output_dir is not a directory: {}".format(output_dir))
+        conflicts = [name for name in pilot_artifacts if (output_dir / name).exists()]
+        if conflicts:
+            raise FileExistsError(
+                "output_dir already contains pilot artifacts {}: {}".format(
+                    conflicts, output_dir
+                )
+            )
+    else:
+        output_dir.mkdir(parents=True)
+
+
 def _failure_category(exc: BaseException, phase: str) -> str:
     if isinstance(exc, PairedRolloutMismatch):
         return "pairing_mismatch"
-    if phase == "load":
+    if phase in ("load", "preflight"):
         return "model_load"
     return "runtime"
 
@@ -1061,14 +1128,14 @@ def run(config: RunnerConfig) -> None:
     _enforce_offline()
     _enforce_determinism_environment()
     tasks = generate_canonical_splits(seed=config.seed)
-    provenance = _provenance(config)
-    manifest = _manifest_payload(config, tasks, provenance)
     output_dir = Path(config.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _prepare_output_dir(output_dir)
     manifest_path = output_dir / "manifest.json"
     status_path = output_dir / "status.json"
     terminal_path = output_dir / "terminal.jsonl"
     run_started = time.perf_counter()
+    provenance = _bootstrap_provenance(config)
+    manifest = _manifest_payload(config, tasks, provenance)
     status: Dict[str, Any] = {
         "label": PILOT_LABEL,
         "run_status": "running",
@@ -1099,6 +1166,59 @@ def run(config: RunnerConfig) -> None:
     )
     _write_json_atomic(manifest_path, manifest)
     _write_json_atomic(status_path, status)
+
+    try:
+        provenance = _provenance(config)
+    except BaseException as exc:
+        terminal = _terminal_record(
+            arm="run",
+            status="failed",
+            phase="preflight",
+            update=None,
+            started=run_started,
+            progress={"peak_vram_mib": None},
+            exc=exc,
+        )
+        status.update(
+            {
+                "run_status": "failed",
+                "comparison_complete": False,
+                "failure_category": terminal["failure_category"],
+                "duration_seconds": round(time.perf_counter() - run_started, 6),
+                "terminal_status": terminal,
+            }
+        )
+        _write_json_atomic(status_path, status)
+        _append_jsonl(
+            terminal_path,
+            {
+                **provenance,
+                "label": PILOT_LABEL,
+                "comparison_complete": False,
+                "scope": "run",
+                "terminal": terminal,
+            },
+        )
+        manifest.update(
+            {
+                "run_status": "failed",
+                "comparison_complete": False,
+                "failure_category": terminal["failure_category"],
+                "terminal_status": terminal,
+            }
+        )
+        _write_json_atomic(manifest_path, manifest)
+        raise
+
+    manifest = _manifest_payload(config, tasks, provenance)
+    manifest.update(
+        {
+            "run_status": "running",
+            "comparison_complete": False,
+            "terminal_status": None,
+        }
+    )
+    _write_json_atomic(manifest_path, manifest)
 
     pairing_state: Dict[str, Any] = {"checked": False, "status": "pending"}
     try:

@@ -130,6 +130,93 @@ class TestForkPilotTrain(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "requires --arm both"):
                 runner.run(config)
 
+    def test_cli_missing_local_model_persists_preflight_failure_artifacts(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            output_path = root / "output"
+            missing_model_path = root / "missing-model"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RUNNER_PATH),
+                    "--arm",
+                    "both",
+                    "--model-path",
+                    str(missing_model_path),
+                    "--output-dir",
+                    str(output_path),
+                    "--device",
+                    "cpu",
+                    "--dtype",
+                    "fp32",
+                ],
+                cwd=str(REPO_ROOT),
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            manifest_path = output_path / "manifest.json"
+            status_path = output_path / "status.json"
+            terminal_path = output_path / "terminal.jsonl"
+            self.assertTrue(manifest_path.is_file())
+            self.assertTrue(status_path.is_file())
+            self.assertTrue(terminal_path.is_file())
+
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            status = json.loads(status_path.read_text(encoding="utf-8"))
+            terminal_events = [
+                json.loads(line)
+                for line in terminal_path.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(manifest["run_status"], "failed")
+            self.assertFalse(manifest["comparison_complete"])
+            self.assertEqual(manifest["failure_category"], "model_load")
+            self.assertEqual(status["run_status"], "failed")
+            self.assertFalse(status["comparison_complete"])
+            self.assertEqual(status["failure_category"], "model_load")
+            self.assertEqual(len(terminal_events), 1)
+            terminal = terminal_events[0]["terminal"]
+            self.assertEqual(terminal_events[0]["scope"], "run")
+            self.assertEqual(terminal["phase"], "preflight")
+            self.assertEqual(terminal["failure_category"], "model_load")
+            self.assertEqual(terminal["exception_type"], "FileNotFoundError")
+            self.assertIn(str(missing_model_path), terminal["exception_message"])
+
+    def test_existing_pilot_artifact_fails_closed_without_overwrite(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output_path = Path(temporary_directory) / "output"
+            output_path.mkdir()
+            manifest_path = output_path / "manifest.json"
+            manifest_path.write_text("existing pilot manifest\n", encoding="utf-8")
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RUNNER_PATH),
+                    "--arm",
+                    "both",
+                    "--model-path",
+                    "/definitely/not/a/local/model",
+                    "--output-dir",
+                    str(output_path),
+                    "--device",
+                    "cpu",
+                    "--dtype",
+                    "fp32",
+                ],
+                cwd=str(REPO_ROOT),
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("already contains pilot artifacts", result.stderr)
+            self.assertEqual(
+                manifest_path.read_text(encoding="utf-8"), "existing pilot manifest\n"
+            )
+            self.assertFalse((output_path / "status.json").exists())
+            self.assertFalse((output_path / "terminal.jsonl").exists())
+
     def test_failed_arm_persists_terminal_status_and_blocks_pair(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             model_path = Path(temporary_directory) / "model"
