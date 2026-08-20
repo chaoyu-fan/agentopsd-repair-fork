@@ -115,4 +115,14 @@ cd /work/FCY/agentopsd-upstream-fork
 
 ## GitHub 发布状态
 
-本地 fork 已冻结并附带完整 handover/evidence。当前 `origin` 仍指向本地官方 checkout，不能直接推送。机器缺少有效 GitHub CLI/SSH/token 认证；GitHub 发布需要先配置一个独立 fork remote 和可用认证，随后推送 `repair/fork-pilot` 与 tag `fork-engineering-pilot-20260820`.
+发布仓库：
+
+```text
+https://github.com/chaoyu-fan/agentopsd-repair-fork
+```
+
+冻结分支：`repair/fork-pilot`
+
+冻结 tag：`fork-engineering-pilot-20260820`
+
+本地 `origin` 仍指向只读官方基线；GitHub 发布使用独立的 `github` remote。不要向 `origin` 推送修复 commit。
