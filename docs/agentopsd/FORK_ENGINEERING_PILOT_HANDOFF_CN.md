@@ -4,7 +4,7 @@
 
 - Fork 路径：`/work/FCY/agentopsd-upstream-fork`
 - 分支：`repair/fork-pilot`
-- 发布冻结 commit：`1b03150dd8963914d58490072a9f003dc230725f`
+- 发布冻结 commit：`51f332418477416eb21845f902d049d937ec8aea`
 - cohort 执行 commit：`46cf04924d7478a609bf59998ca093e257c7b060`
 - 上游基线：`0c478b2d7cdc201d9b1f076ec5b3dec7e88a161b`
 - 当前日期：2026-08-20
