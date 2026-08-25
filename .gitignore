@@ -132,3 +132,8 @@ data/
 .tmp
 *ports
 
+# Local evidence staging assets (large downloads and generated indexes)
+cache/
+resources*/
+**/resources*/
+

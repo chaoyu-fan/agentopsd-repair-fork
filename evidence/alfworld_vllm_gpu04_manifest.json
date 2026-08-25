@@ -1,0 +1,50 @@
+{
+  "status": "PASS_ENGINEERING_SMOKE",
+  "claimability": "not_paper_result",
+  "observed_at": "2026-08-21",
+  "source_branch": "codex/fsdp2-vllm-compat",
+  "source_commit": "b6831f63f166760876cfb727c00d7b3ac2cee225",
+  "patch": "verl/workers/sharding_manager/fsdp_vllm.py: FSDP2-safe getattr fallback",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "total_memory_mib": 32607,
+    "sampler_interval_ms": 500,
+    "peak_memory_used_mib": 32138,
+    "minimum_free_memory_mib": 50
+  },
+  "configuration": {
+    "model": "Qwen2.5-3B-Instruct",
+    "fsdp": "fsdp2",
+    "rollout": "vllm",
+    "vllm_gpu_memory_utilization": 0.4,
+    "max_model_len": 1280,
+    "response_length": 256,
+    "train_rows": 1,
+    "val_rows": 1,
+    "max_steps": 1,
+    "alfworld_max_steps": 1
+  },
+  "observed_metrics": {
+    "episode_valid_action_ratio": 1.0,
+    "episode_reward_mean": 0.0,
+    "episode_success_rate": 0.0,
+    "torch_process_peak_memory_allocated_gib": 36.354,
+    "torch_process_peak_memory_reserved_gib": 39.145,
+    "step_seconds": 10.923
+  },
+  "artifacts": {
+    "terminal_log": {
+      "path": "/home/agentopsd/runs/alfworld_approx_vllm256_gpu04/terminal_resource_check.log",
+      "sha256": "cd2a2d25000be1920c9c8a6662bbfcd4efdbc232a8034a8a8210571aaac1e61b"
+    },
+    "nvidia_smi_log": {
+      "path": "/home/agentopsd/runs/alfworld_approx_vllm256_gpu04/nvidia_smi_resource_check.csv",
+      "sha256": "ce522c1458a65d869a679c05eb39df26f787f64c15343e76be0ccb14d58a3e62"
+    },
+    "rollout": {
+      "path": "/home/agentopsd/runs/alfworld_approx_vllm256_gpu04/rollouts/1.jsonl",
+      "sha256": "469cad5273dab84cab10877dbaac03ab288ddb5f7a504e1c76fd09a6d4544a27"
+    }
+  },
+  "interpretation": "Correct FSDP2/vLLM rollout and one update completed without OOM, but the physical-memory minimum free margin was only 50 MiB. Do not launch long training at this setting without a further memory-saving change."
+}

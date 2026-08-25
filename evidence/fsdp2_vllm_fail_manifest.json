@@ -1,0 +1,29 @@
+{
+  "status": "FAIL",
+  "failure_id": "alfworld_approx_vllm256_fsdp2_precompat",
+  "observed_at": "2026-08-21",
+  "scope": "single-card AgentOPSD ALFWorld vLLM smoke before compatibility patch",
+  "source_commit": "b6831f63f166760876cfb727c00d7b3ac2cee225",
+  "configuration": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "fsdp_strategy": "fsdp2",
+    "rollout": "vllm",
+    "model": "Qwen2.5-3B-Instruct",
+    "response_length": 256,
+    "train_rows": 1,
+    "max_steps": 1
+  },
+  "error": {
+    "type": "AttributeError",
+    "message": "FSDPQwen2ForCausalLM object has no attribute _fsdp_wrapped_module",
+    "location": "verl/workers/sharding_manager/fsdp_vllm.py:174",
+    "cause": "FSDP1-only wrapped-module access in the FSDP2/vLLM sharding manager"
+  },
+  "terminal_log": {
+    "path": "/home/agentopsd/runs/alfworld_approx_vllm256_dump/terminal.log",
+    "sha256": "555f5d6c174c80674cc466936431e33fc1c8ffe1aba6623d35f10fd38754c4fc"
+  },
+  "resolution_branch": "codex/fsdp2-vllm-compat",
+  "resolution": "Minimal getattr(self.module, _fsdp_wrapped_module, self.module) compatibility patch; no algorithm/data changes",
+  "post_patch_smoke": "/home/agentopsd/runs/alfworld_approx_vllm256_dump/terminal_retry_fsdp2.log"
+}

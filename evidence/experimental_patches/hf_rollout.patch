@@ -1,0 +1,14 @@
+*** Begin Patch
+*** Update File: verl/workers/rollout/hf_rollout.py
+@@
+-            output = self.module.generate(
++            # Qwen2-family models compute the correct RoPE positions from the
++            # attention mask during ``generate``. Passing verl's packed
++            # position ids here can reset/duplicate positions for left-padded
++            # prompts and produce degenerate repetition. We still retain and
++            # extend the ids below for downstream log-prob bookkeeping.
++            output = self.module.generate(
+                 input_ids=idx,
+                 attention_mask=attention_mask,
+-                position_ids=position_ids,
+                 do_sample=do_sample,

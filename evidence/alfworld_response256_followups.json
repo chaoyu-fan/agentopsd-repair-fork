@@ -1,0 +1,51 @@
+{
+  "label": "single_card_approximation_not_paper_reproduction",
+  "model": "Qwen2.5-1.5B-Instruct",
+  "model_sha256": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee",
+  "environment": "ALFWorld AlfredTWEnv",
+  "paper_deviation": "1 GPU, placeholder parquet cardinality, 8-step horizon, shortened updates",
+  "runs": [
+    {
+      "id": "alfworld_approx_1p5b_vllm_h8_response256_10updates",
+      "command": "tools/run_alfworld_approx_1p5b_vllm_h8_response256_10updates.sh",
+      "train_rows": 4,
+      "rollouts_per_row": 2,
+      "updates": 10,
+      "response_length": 256,
+      "valid_action_ratio_by_update": [0.844, 0.906, 1.0, 0.891, 0.938, 0.953, 0.984, 0.937, 0.906, 0.984],
+      "positive_episode_updates": {"8": {"successful_episodes": 1, "episodes": 8, "score": 10.0}},
+      "physical_gpu_sampler": null,
+      "pytorch_peak_allocated_gib": 20.078,
+      "pytorch_peak_reserved_gib": 26.106,
+      "raw_rollouts": "/home/agentopsd/runs/alfworld_approx_1p5b_vllm_h8_response256_10updates/rollouts"
+    },
+    {
+      "id": "alfworld_approx_1p5b_vllm_h8_response256_n4_5updates",
+      "command": "tools/run_alfworld_approx_1p5b_vllm_h8_response256_n4_5updates.sh",
+      "train_rows": 4,
+      "rollouts_per_row": 4,
+      "updates": 5,
+      "response_length": 256,
+      "valid_action_ratio_by_update": [0.828, 0.93, 0.969, 0.953, 0.937],
+      "positive_episode_updates": {"5": {"successful_episodes": 1, "episodes": 16, "success_rate": 0.062, "reward_mean": 0.625, "pick_and_place_success_rate": 0.25}},
+      "physical_gpu_sampler": {"path": "/home/agentopsd/runs/alfworld_approx_1p5b_vllm_h8_response256_n4_5updates/nvidia_smi.csv", "samples": 426, "peak_used_mib": 23485, "min_free_mib": 8703},
+      "pytorch_peak_allocated_gib": 20.084,
+      "pytorch_peak_reserved_gib": 26.106,
+      "raw_rollouts": "/home/agentopsd/runs/alfworld_approx_1p5b_vllm_h8_response256_n4_5updates/rollouts"
+    },
+    {
+      "id": "alfworld_approx_1p5b_vllm_h8_response256_n4_10updates",
+      "command": "tools/run_alfworld_approx_1p5b_vllm_h8_response256_n4_10updates.sh",
+      "train_rows": 4,
+      "rollouts_per_row": 4,
+      "updates": 10,
+      "response_length": 256,
+      "valid_action_ratio_by_update": [0.828, 0.93, 0.953, 0.961, 0.938, 0.953, 0.945, 0.969, 0.953, 0.977],
+      "positive_episode_updates": {},
+      "physical_gpu_sampler": {"path": "/home/agentopsd/runs/alfworld_approx_1p5b_vllm_h8_response256_n4_10updates/nvidia_smi.csv", "samples": 773, "peak_used_mib": 23485, "min_free_mib": 8703},
+      "pytorch_peak_allocated_gib": 20.084,
+      "pytorch_peak_reserved_gib": 26.106,
+      "raw_rollouts": "/home/agentopsd/runs/alfworld_approx_1p5b_vllm_h8_response256_n4_10updates/rollouts"
+    }
+  ]
+}

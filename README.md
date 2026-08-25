@@ -46,6 +46,15 @@ and **Search-QA** with Qwen2.5 (3B / 7B).
   <img src="docs/agentopsd/dynamics.png" alt="training dynamics" style="width:100%;">
 </div>
 
+## RTX 5090 single-card evidence
+
+The repair fork also contains a frozen, auditable single-card approximation run on one
+RTX 5090. It is explicitly **not** a reproduction of the paper's 8/2/4-GPU,
+full-data, 150-update protocol. Start with the [reproduction matrix](docs/agentopsd/RTX5090_REPRODUCTION_MATRIX_CN.md),
+[failure ledger](docs/agentopsd/RTX5090_FAILURE_LEDGER_CN.md),
+[deviation statement](docs/agentopsd/RTX5090_DEVIATIONS_CN.md), and
+[evidence freeze](docs/agentopsd/RTX5090_EVIDENCE_FREEZE_CN.md).
+
 ## 🛠️ Installation
 
 ### Python environment

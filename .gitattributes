@@ -1,0 +1,4 @@
+# Evidence and shell/Python rerun inputs are hashed byte-for-byte. Keep LF on every
+# platform so evidence/SHA256SUMS.txt remains verifiable after a Windows checkout.
+evidence/** -text
+tools/** -text

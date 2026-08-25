@@ -1,0 +1,10 @@
+diff --git a/verl/workers/fsdp_workers.py b/verl/workers/fsdp_workers.py
+--- a/verl/workers/fsdp_workers.py
++++ b/verl/workers/fsdp_workers.py
+@@ -281,2 +281,6 @@ class ActorRolloutRefWorker(Worker):
+                 actor_module = get_peft_model(actor_module, LoraConfig(**lora_config))
++            # PEFT creates adapter weights in fp32 by default. FSDP1 requires
++            # all flattened parameters to share one dtype, so align the newly
++            # injected LoRA tensors with the actor model dtype.
++            actor_module.to(torch_dtype)
+         torch.distributed.barrier()

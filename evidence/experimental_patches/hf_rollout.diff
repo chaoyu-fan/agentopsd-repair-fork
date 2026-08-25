@@ -1,0 +1,12 @@
+--- verl/workers/rollout/hf_rollout.py
++++ verl/workers/rollout/hf_rollout.py
+@@ -110,7 +110,8 @@
+             output = self.module.generate(
+                 input_ids=idx,
+                 attention_mask=attention_mask,
+-                position_ids=position_ids,
++                # Do not pass verl's packed position ids to Qwen2 generate:
++                # the model derives correct RoPE positions from the mask.
+                 do_sample=do_sample,
+                 max_new_tokens=response_length,
+                 eos_token_id=eos_token_id,
